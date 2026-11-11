@@ -68,7 +68,27 @@ Les cours sont rédigés pour cette formation : ils s'inspirent de la documentat
 
 ## Déploiement rapide sur VM
 
-La formation se suit dans une **VM Ubuntu Server**, pilotée en SSH depuis ta machine hôte (**Ubuntu ou Arch Linux**). Le même script [`setup/setup-vm.sh`](https://github.com/Milo-gdb/Kubernetes-formation/blob/main/setup/setup-vm.sh) prépare les deux côtés : il détecte tout seul s'il tourne dans la VM (Ubuntu Server virtualisé) ou sur l'hôte (Arch, ou Ubuntu avec bureau). Tu peux forcer le mode avec `--vm` ou `--hote`.
+La formation se suit dans une **VM Ubuntu Server**, pilotée en SSH depuis ta machine hôte (**Ubuntu ou Arch Linux**). Le script [`setup/setup-vm.sh`](https://github.com/Milo-gdb/Kubernetes-formation/blob/main/setup/setup-vm.sh) prépare tout. Il a trois modes : `--complet` (tout depuis l'hôte), `--vm` et `--hote` (VM créée à la main). Sans option, il choisit tout seul entre VM et hôte.
+
+### Option 1 : tout automatique depuis l'hôte (`--complet`)
+
+```bash
+curl -fsSLO https://raw.githubusercontent.com/Milo-gdb/Kubernetes-formation/main/setup/setup-vm.sh
+bash setup-vm.sh --complet
+```
+
+Sur ta machine Ubuntu ou Arch (avec la virtualisation VT-x/AMD-V activée dans le BIOS), le script :
+
+1. installe **KVM/libvirt** (`qemu`, `libvirt`, `virt-install`, avec `apt` ou `pacman --needed`) et active le réseau NAT `default` de libvirt ;
+2. télécharge l'image **Ubuntu Server 24.04 minimal** (image cloud officielle, environ 250 Mo) ;
+3. crée la VM `formation-k8s` (**2 vCPU, 4 Go de RAM, 20 Go de disque**) avec ton utilisateur et ta clé SSH (créée si tu n'en as pas). Au premier démarrage, cloud-init lance `setup-vm.sh --vm` dans la VM ;
+4. attend la fin de la configuration, ajoute `<IP_VM> task-manager.local api.task-manager.local` à `/etc/hosts`, puis prend le snapshot **`avant-k3s`**.
+
+Il ne reste plus qu'à lancer `ssh <utilisateur>@<IP_VM>`. Pour revenir à l'état d'avant k3s : `sudo virsh snapshot-revert formation-k8s avant-k3s`. Les réglages se changent par variables d'environnement, par exemple `VM_RAM_MO=6144 UBUNTU_VERSION=22.04 bash setup-vm.sh --complet` (voir `bash setup-vm.sh --help`). La VM est sur le réseau NAT de libvirt : elle est joignable depuis l'hôte uniquement, ce qui suffit pour la formation. Tu peux aussi la gérer graphiquement avec `virt-manager`.
+
+> **Docker installé sur l'hôte ?** Docker peut bloquer le trafic sortant des VM libvirt (politique `FORWARD` à `DROP`). Si la configuration reste bloquée, regarde le journal de la VM avec `ssh <utilisateur>@<IP_VM> sudo tail /var/log/cloud-init-output.log` et consulte la documentation de Docker sur le pare-feu.
+
+### Option 2 : VM créée à la main (`--vm` puis `--hote`)
 
 1. **Crée une VM Ubuntu Server 22.04 ou 24.04** (VirtualBox, VMware, virt-manager/KVM, Proxmox…) avec **2 vCPU, 4 Go de RAM, 20 Go de disque** et une **carte réseau en mode pont (bridge)**, pour que la VM obtienne une IP joignable depuis l'hôte.
 2. **Dans la console de la VM**, télécharge et lance le script avec ton utilisateur habituel (il utilise `sudo`) :
