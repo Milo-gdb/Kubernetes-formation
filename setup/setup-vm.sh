@@ -396,8 +396,9 @@ mode_complet() {
       ok "image téléchargée : $image"
     fi
     if [ ! -e "$disque" ]; then
-      "${SUDO[@]}" cp "$image" "$disque"
-      "${SUDO[@]}" qemu-img resize -q "$disque" "${VM_DISQUE_GO}G"
+      "${SUDO[@]}" cp "$image" "$disque.part"
+      "${SUDO[@]}" qemu-img resize -q "$disque.part" "${VM_DISQUE_GO}G"
+      "${SUDO[@]}" mv "$disque.part" "$disque"
     fi
     ok "disque : $disque"
     user_data="$(mktemp)"
