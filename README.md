@@ -82,7 +82,7 @@ Pour suivre la formation dans une VM dédiée, pilotée en SSH depuis ta machine
     Le script installe et active **SSH** (et ouvre le port 22 si `ufw` est actif), installe les paquets de base (`curl git vim nano jq bash-completion ca-certificates`), clone ce dépôt dans `~/Kubernetes-formation`, puis affiche l'IP de la VM et la commande SSH à utiliser. Il est **idempotent** : tu peux le relancer sans risque (il met alors le dépôt à jour).
 
 3. **Suis les deux rappels affichés à la fin** :
-    - ajoute `<IP_VM> task-manager.local` dans le fichier `/etc/hosts` de la **machine hôte** (`C:\Windows\System32\drivers\etc\hosts` sous Windows) pour l'Ingress du fil rouge (chapitre 06) ;
+    - ajoute `<IP_VM> task-manager.local api.task-manager.local` dans le fichier `/etc/hosts` de la **machine hôte** (`C:\Windows\System32\drivers\etc\hosts` sous Windows) pour l'Ingress du fil rouge (chapitre 06) ;
     - **prends un snapshot de la VM maintenant**, avant d'installer k3s, pour pouvoir repartir de zéro à tout moment.
 4. **Connecte-toi en SSH depuis l'hôte** : `ssh <utilisateur>@<IP_VM>`.
 5. **Commence la formation au [chapitre 00](00-prerequis/lecon.md)** (`cd ~/Kubernetes-formation`).

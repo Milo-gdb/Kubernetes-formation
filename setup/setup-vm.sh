@@ -100,7 +100,7 @@ echo
 echo "Rappels :"
 echo "  (a) Sur la machine hôte, ajoute cette ligne au fichier /etc/hosts"
 printf '%s\n' "      (C:\\Windows\\System32\\drivers\\etc\\hosts sous Windows) pour l'Ingress du fil rouge (chapitre 06) :"
-echo "          $IP task-manager.local"
+echo "          $IP task-manager.local api.task-manager.local"
 echo "  (b) Prends un snapshot de la VM MAINTENANT, avant d'installer k3s :"
 echo "      tu pourras ainsi repartir de zéro à tout moment."
 echo
