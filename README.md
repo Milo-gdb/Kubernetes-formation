@@ -89,7 +89,7 @@ La formation se suit dans une **VM Ubuntu Server**, pilotée en SSH depuis ta ma
     bash setup-vm.sh --hote <IP_VM> <utilisateur_VM>    # sans arguments, l'IP et l'utilisateur sont demandés
     ```
 
-    Il installe si besoin `ssh`, `curl` et `git` (avec `apt` ou `pacman --needed`, sans mise à jour complète du système), ajoute `<IP_VM> task-manager.local api.task-manager.local` à `/etc/hosts` pour l'Ingress du fil rouge (chapitre 06), en remplaçant une éventuelle ancienne ligne (sauvegarde dans `/etc/hosts.avant-formation`), puis vérifie que le port 22 de la VM répond. Sous Windows, ajoute cette ligne à la main dans `C:\Windows\System32\drivers\etc\hosts`.
+    Il installe si besoin `ssh`, `curl` et `git` (avec `apt` ou `pacman --needed`, sans mise à jour complète du système), ajoute `<IP_VM> task-manager.local api.task-manager.local` à `/etc/hosts` pour l'Ingress du fil rouge (chapitre 06), en retirant ces noms des anciennes lignes sans toucher aux autres alias (sauvegarde de l'état initial dans `/etc/hosts.avant-formation`), puis vérifie que le port 22 de la VM répond. Sous Windows, ajoute cette ligne à la main dans `C:\Windows\System32\drivers\etc\hosts`.
 
 5. **Connecte-toi en SSH depuis l'hôte** : `ssh <utilisateur_VM>@<IP_VM>`.
 6. **Commence la formation au [chapitre 00](00-prerequis/lecon.md)** (`cd ~/Kubernetes-formation`).

@@ -171,15 +171,28 @@ demander() {  # demander <invite> <défaut> → lit sur le terminal, même si le
   echo "${reponse:-$2}"
 }
 
-mettre_a_jour_hosts() {  # remplace toute ligne existante pour les noms du fil rouge, puis ajoute la nouvelle
+mettre_a_jour_hosts() {  # retire les noms du fil rouge des lignes existantes (autres alias conservés), puis ajoute la nouvelle
   local ligne="$1 $NOMS_INGRESS" tmp
-  if grep -qxF "$ligne" "$FICHIER_HOSTS"; then
+  tmp="$(mktemp)"
+  awk '
+    { contenu = $0; commentaire = ""; i = index(contenu, "#")
+      if (i) { commentaire = substr(contenu, i); contenu = substr(contenu, 1, i - 1) }
+      n = split(contenu, champs, " ")
+      if (n < 2) { print; next }
+      garde = champs[1]; restants = 0; retire = 0
+      for (j = 2; j <= n; j++) {
+        if (champs[j] == "task-manager.local" || champs[j] == "api.task-manager.local") retire = 1
+        else { garde = garde " " champs[j]; restants++ }
+      }
+      if (!retire) { print; next }
+      if (restants > 0) print garde (commentaire != "" ? " " commentaire : "")
+    }' "$FICHIER_HOSTS" >"$tmp"
+  echo "$ligne" >>"$tmp"
+  if cmp -s "$tmp" "$FICHIER_HOSTS"; then
+    rm -f "$tmp"
     ok "$FICHIER_HOSTS contient déjà : $ligne"
     return
   fi
-  tmp="$(mktemp)"
-  grep -vE '(^|[[:space:]])(api\.)?task-manager\.local([[:space:]]|$)' "$FICHIER_HOSTS" >"$tmp" || true
-  echo "$ligne" >>"$tmp"
   # Sauvegarde unique : on garde l'état d'avant le tout premier passage du script.
   [ -e "$FICHIER_HOSTS.avant-formation" ] || "${SUDO[@]}" cp "$FICHIER_HOSTS" "$FICHIER_HOSTS.avant-formation"
   # cat + tee plutôt que mv : conserve le fichier, ses droits et fonctionne même s'il est monté (conteneurs).
