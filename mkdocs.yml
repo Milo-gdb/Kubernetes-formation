@@ -8,8 +8,8 @@ edit_uri: edit/main/
 # Les Markdown sont à la racine du dépôt (README.md = page d'accueil) : plugin same-dir.
 docs_dir: .
 exclude_docs: |
-  site/
-  .venv/
+  /site/
+  /.venv/
   requirements-docs.txt
 
 theme:

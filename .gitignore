@@ -1,4 +1,4 @@
-site/
-.venv/
+/site/
+/.venv/
 __pycache__/
 *.tgz
