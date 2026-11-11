@@ -180,7 +180,8 @@ mettre_a_jour_hosts() {  # remplace toute ligne existante pour les noms du fil r
   tmp="$(mktemp)"
   grep -vE '(^|[[:space:]])(api\.)?task-manager\.local([[:space:]]|$)' "$FICHIER_HOSTS" >"$tmp" || true
   echo "$ligne" >>"$tmp"
-  "${SUDO[@]}" cp "$FICHIER_HOSTS" "$FICHIER_HOSTS.avant-formation"
+  # Sauvegarde unique : on garde l'état d'avant le tout premier passage du script.
+  [ -e "$FICHIER_HOSTS.avant-formation" ] || "${SUDO[@]}" cp "$FICHIER_HOSTS" "$FICHIER_HOSTS.avant-formation"
   # cat + tee plutôt que mv : conserve le fichier, ses droits et fonctionne même s'il est monté (conteneurs).
   "${SUDO[@]}" tee "$FICHIER_HOSTS" <"$tmp" >/dev/null
   rm -f "$tmp"
