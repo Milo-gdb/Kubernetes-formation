@@ -435,8 +435,12 @@ mode_complet() {
   if "${VIRSH[@]}" snapshot-info "$VM_NOM" "$SNAPSHOT" >/dev/null 2>&1; then
     ok "snapshot déjà présent"
   else
-    "${VIRSH[@]}" snapshot-create-as "$VM_NOM" "$SNAPSHOT" "VM préparée par setup-vm.sh, avant l'installation de k3s" >/dev/null
-    ok "snapshot créé"
+    if ssh_vm "$ip" command -v k3s >/dev/null 2>&1; then
+      alerte "k3s est déjà installé dans la VM : pas de snapshot « $SNAPSHOT » (il ne serait plus « avant k3s »)."
+    else
+      "${VIRSH[@]}" snapshot-create-as "$VM_NOM" "$SNAPSHOT" "VM préparée par setup-vm.sh, avant l'installation de k3s" >/dev/null
+      ok "snapshot créé"
+    fi
   fi
 
   etape "Tout est prêt"
