@@ -66,6 +66,29 @@ Les cours sont rédigés pour cette formation : ils s'inspirent de la documentat
 - accès `sudo` et accès Internet (images de conteneurs, script d'installation) ;
 - outils : `curl`, `git`, `python3` ; Docker est utile au chapitre 01 ; `helm` au chapitre 12 ; `k9s` au bonus 01.
 
+## Déploiement rapide sur VM
+
+Pour suivre la formation dans une VM dédiée, pilotée en SSH depuis ta machine :
+
+1. **Crée une VM Ubuntu Server 22.04 ou 24.04** (VirtualBox, VMware, Proxmox, Hyper-V…) avec **2 vCPU, 4 Go de RAM, 20 Go de disque** et une **carte réseau en mode pont (bridge)**, pour que la VM obtienne une IP joignable depuis l'hôte.
+2. **Copie et exécute [`setup/setup-vm.sh`](https://github.com/Milo-gdb/Kubernetes-formation/blob/main/setup/setup-vm.sh)** dans la console de la VM, avec ton utilisateur habituel (le script utilise `sudo`) :
+
+    ```bash
+    curl -fsSLO https://raw.githubusercontent.com/Milo-gdb/Kubernetes-formation/main/setup/setup-vm.sh
+    # ou : wget https://raw.githubusercontent.com/Milo-gdb/Kubernetes-formation/main/setup/setup-vm.sh
+    bash setup-vm.sh
+    ```
+
+    Le script installe et active **SSH** (et ouvre le port 22 si `ufw` est actif), installe les paquets de base (`curl git vim nano jq bash-completion ca-certificates`), clone ce dépôt dans `~/Kubernetes-formation`, puis affiche l'IP de la VM et la commande SSH à utiliser. Il est **idempotent** : tu peux le relancer sans risque (il met alors le dépôt à jour).
+
+3. **Suis les deux rappels affichés à la fin** :
+    - ajoute `<IP_VM> task-manager.local api.task-manager.local` dans le fichier `/etc/hosts` de la **machine hôte** (`C:\Windows\System32\drivers\etc\hosts` sous Windows) pour l'Ingress du fil rouge (chapitre 06) ;
+    - **prends un snapshot de la VM maintenant**, avant d'installer k3s, pour pouvoir repartir de zéro à tout moment.
+4. **Connecte-toi en SSH depuis l'hôte** : `ssh <utilisateur>@<IP_VM>`.
+5. **Commence la formation au [chapitre 00](00-prerequis/lecon.md)** (`cd ~/Kubernetes-formation`).
+
+Le script n'installe volontairement **ni k3s, ni kubectl, ni Helm, ni k9s** : tu les installeras en suivant les leçons (k3s et kubectl au [chapitre 02](02-installation-k3s/lecon.md), Helm au [chapitre 12](12-helm-ecosysteme/lecon.md), k9s au [bonus 01](bonus-01-k9s/lecon.md)).
+
 ## Installer k3s (résumé du chapitre 02)
 
 ```bash
