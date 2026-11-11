@@ -19,6 +19,7 @@ spec:
         {{- include "task-manager.selector" (dict "ctx" . "composant" "api") | nindent 8 }}
       annotations:
         checksum/secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmaps.yaml") . | sha256sum }}
     spec:
       containers:
         - name: postgrest
