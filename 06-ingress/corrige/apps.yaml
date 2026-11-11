@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-a
+  namespace: td-06
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: app-a }
+  template:
+    metadata:
+      labels: { app: app-a }
+    spec:
+      containers:
+        - name: whoami
+          image: traefik/whoami:v1.12.0
+          args: ["--name=app-a"]
+          ports: [{ containerPort: 80, name: http }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-a
+  namespace: td-06
+spec:
+  selector: { app: app-a }
+  ports: [{ port: 80, targetPort: http, name: http }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-b
+  namespace: td-06
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: app-b }
+  template:
+    metadata:
+      labels: { app: app-b }
+    spec:
+      containers:
+        - name: whoami
+          image: traefik/whoami:v1.12.0
+          args: ["--name=app-b"]
+          ports: [{ containerPort: 80, name: http }]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-b
+  namespace: td-06
+spec:
+  selector: { app: app-b }
+  ports: [{ port: 80, targetPort: http, name: http }]
