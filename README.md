@@ -68,26 +68,33 @@ Les cours sont rédigés pour cette formation : ils s'inspirent de la documentat
 
 ## Déploiement rapide sur VM
 
-Pour suivre la formation dans une VM dédiée, pilotée en SSH depuis ta machine :
+La formation se suit dans une **VM Ubuntu Server**, pilotée en SSH depuis ta machine hôte (**Ubuntu ou Arch Linux**). Le même script [`setup/setup-vm.sh`](https://github.com/Milo-gdb/Kubernetes-formation/blob/main/setup/setup-vm.sh) prépare les deux côtés : il détecte tout seul s'il tourne dans la VM (Ubuntu Server virtualisé) ou sur l'hôte (Arch, ou Ubuntu avec bureau). Tu peux forcer le mode avec `--vm` ou `--hote`.
 
-1. **Crée une VM Ubuntu Server 22.04 ou 24.04** (VirtualBox, VMware, Proxmox, Hyper-V…) avec **2 vCPU, 4 Go de RAM, 20 Go de disque** et une **carte réseau en mode pont (bridge)**, pour que la VM obtienne une IP joignable depuis l'hôte.
-2. **Copie et exécute [`setup/setup-vm.sh`](https://github.com/Milo-gdb/Kubernetes-formation/blob/main/setup/setup-vm.sh)** dans la console de la VM, avec ton utilisateur habituel (le script utilise `sudo`) :
+1. **Crée une VM Ubuntu Server 22.04 ou 24.04** (VirtualBox, VMware, virt-manager/KVM, Proxmox…) avec **2 vCPU, 4 Go de RAM, 20 Go de disque** et une **carte réseau en mode pont (bridge)**, pour que la VM obtienne une IP joignable depuis l'hôte.
+2. **Dans la console de la VM**, télécharge et lance le script avec ton utilisateur habituel (il utilise `sudo`) :
 
     ```bash
     curl -fsSLO https://raw.githubusercontent.com/Milo-gdb/Kubernetes-formation/main/setup/setup-vm.sh
     # ou : wget https://raw.githubusercontent.com/Milo-gdb/Kubernetes-formation/main/setup/setup-vm.sh
-    bash setup-vm.sh
+    bash setup-vm.sh            # mode VM détecté automatiquement (sinon : bash setup-vm.sh --vm)
     ```
 
-    Le script installe et active **SSH** (et ouvre le port 22 si `ufw` est actif), installe les paquets de base (`curl git vim nano jq bash-completion ca-certificates`), clone ce dépôt dans `~/Kubernetes-formation`, puis affiche l'IP de la VM et la commande SSH à utiliser. Il est **idempotent** : tu peux le relancer sans risque (il met alors le dépôt à jour).
+    Il installe et active **SSH** (et ouvre le port 22 si `ufw` est actif), installe les paquets de base (`curl git vim nano jq bash-completion ca-certificates`), clone ce dépôt dans `~/Kubernetes-formation`, puis affiche l'IP de la VM et la commande à lancer sur l'hôte. Le mode VM refuse de tourner ailleurs que sur Ubuntu.
 
-3. **Suis les deux rappels affichés à la fin** :
-    - ajoute `<IP_VM> task-manager.local api.task-manager.local` dans le fichier `/etc/hosts` de la **machine hôte** (`C:\Windows\System32\drivers\etc\hosts` sous Windows) pour l'Ingress du fil rouge (chapitre 06) ;
-    - **prends un snapshot de la VM maintenant**, avant d'installer k3s, pour pouvoir repartir de zéro à tout moment.
-4. **Connecte-toi en SSH depuis l'hôte** : `ssh <utilisateur>@<IP_VM>`.
-5. **Commence la formation au [chapitre 00](00-prerequis/lecon.md)** (`cd ~/Kubernetes-formation`).
+3. **Prends un snapshot de la VM maintenant**, avant d'installer k3s, pour pouvoir repartir de zéro à tout moment.
+4. **Sur la machine hôte (Ubuntu ou Arch)**, lance le même script en mode hôte avec l'IP et l'utilisateur affichés par la VM :
 
-Le script n'installe volontairement **ni k3s, ni kubectl, ni Helm, ni k9s** : tu les installeras en suivant les leçons (k3s et kubectl au [chapitre 02](02-installation-k3s/lecon.md), Helm au [chapitre 12](12-helm-ecosysteme/lecon.md), k9s au [bonus 01](bonus-01-k9s/lecon.md)).
+    ```bash
+    curl -fsSLO https://raw.githubusercontent.com/Milo-gdb/Kubernetes-formation/main/setup/setup-vm.sh
+    bash setup-vm.sh --hote <IP_VM> <utilisateur_VM>    # sans arguments, l'IP et l'utilisateur sont demandés
+    ```
+
+    Il installe si besoin `ssh`, `curl` et `git` (avec `apt` ou `pacman --needed`, sans mise à jour complète du système), ajoute `<IP_VM> task-manager.local api.task-manager.local` à `/etc/hosts` pour l'Ingress du fil rouge (chapitre 06), en remplaçant une éventuelle ancienne ligne (sauvegarde dans `/etc/hosts.avant-formation`), puis vérifie que le port 22 de la VM répond. Sous Windows, ajoute cette ligne à la main dans `C:\Windows\System32\drivers\etc\hosts`.
+
+5. **Connecte-toi en SSH depuis l'hôte** : `ssh <utilisateur_VM>@<IP_VM>`.
+6. **Commence la formation au [chapitre 00](00-prerequis/lecon.md)** (`cd ~/Kubernetes-formation`).
+
+Les deux modes sont **idempotents** : tu peux les relancer sans risque. Le script n'installe volontairement **ni k3s, ni kubectl, ni Helm, ni k9s** : tu les installeras en suivant les leçons (k3s et kubectl au [chapitre 02](02-installation-k3s/lecon.md), Helm au [chapitre 12](12-helm-ecosysteme/lecon.md), k9s au [bonus 01](bonus-01-k9s/lecon.md)).
 
 ## Installer k3s (résumé du chapitre 02)
 
