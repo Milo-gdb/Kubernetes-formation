@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: task-manager
+  labels:
+    app: postgres
+    app.kubernetes.io/part-of: task-manager
+spec:
+  replicas: 1
+  # Recreate : l'ancien pod est arrêté AVANT le nouveau, ils ne se disputent jamais le volume RWO.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        app.kubernetes.io/part-of: task-manager
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          # pg_isready teste que le serveur accepte les connexions.
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "pg_isready -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\""]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_DB
+            # Sous-dossier : évite le conflit avec "lost+found" à la racine de certains volumes
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init-sql
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-data
+        - name: init-sql
+          configMap:
+            name: postgres-init

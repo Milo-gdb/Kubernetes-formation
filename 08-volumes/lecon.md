@@ -150,6 +150,7 @@ Test de persistance :
 curl -s -X POST http://task-manager.local/api/tasks -H 'Content-Type: application/json' -d '{"title":"Survivre au redémarrage"}'
 kubectl delete pod -n task-manager -l app=postgres
 kubectl rollout status -n task-manager deploy/postgres
+sleep 30   # le temps que l'API se reconnecte à la base
 curl -s http://task-manager.local/api/tasks | grep Survivre      # toujours là
 ```
 
