@@ -371,6 +371,7 @@ mode_complet() {
   "${VIRSH[@]}" net-autostart default >/dev/null
   ok "réseau libvirt « default » (NAT) actif"
 
+  local vm_creee=""
   etape "VM $VM_NOM : Ubuntu Server $UBUNTU_VERSION minimal, $VM_CPU vCPU, $VM_RAM_MO Mo de RAM, $VM_DISQUE_GO Go de disque"
   if "${VIRSH[@]}" dominfo "$VM_NOM" >/dev/null 2>&1; then
     ok "VM déjà existante : on la réutilise"
@@ -405,6 +406,7 @@ mode_complet() {
       --network network=default,model=virtio --graphics none --noautoconsole \
       --cloud-init "user-data=$user_data"
     rm -f "$user_data"
+    vm_creee=1
     ok "VM créée et démarrée"
   fi
 
@@ -423,7 +425,8 @@ mode_complet() {
     ssh_vm "$ip" bash /usr/local/sbin/setup-vm.sh --vm
   fi
   ok "VM configurée (SSH, paquets de base, dépôt cloné dans ~/Kubernetes-formation)"
-  en_utilisateur ssh-keygen -R "$ip" >/dev/null 2>&1 || true
+  # VM neuve = nouvelle clé d'hôte : on oublie seulement l'ancienne clé connue pour cette IP.
+  [ -z "$vm_creee" ] || en_utilisateur ssh-keygen -R "$ip" >/dev/null 2>&1 || true
 
   etape "Résolution de $NOMS_INGRESS (Ingress du chapitre 06)"
   mettre_a_jour_hosts "$ip"
