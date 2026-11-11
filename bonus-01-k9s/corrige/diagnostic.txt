@@ -1,0 +1,4 @@
+Statut : postgres en CrashLoopBackOff (RESTARTS qui augmente) ; api Running 0/1 (readiness /ready en échec)
+Message : "Database is uninitialized and superuser password is not specified."
+Cause : POSTGRES_PASSWORD absent du Deployment postgres ; le Secret postgres-credentials n'est pas référencé
+Touches : :ns, :pods, d (describe), p (logs précédents), l (logs), :secrets, :deploy, e (edit)
