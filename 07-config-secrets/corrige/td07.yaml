@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: parametres
+  namespace: td-07
+data:
+  COULEUR: bleu
+  TAILLE: "42"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lecteur-env
+  namespace: td-07
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.37
+      command: ["sleep", "3600"]
+      envFrom:
+        - configMapRef:
+            name: parametres
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lecteur-vol
+  namespace: td-07
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.37
+      command: ["sh", "-c", "while true; do cat /config/message.txt; echo; sleep 5; done"]
+      volumeMounts:
+        - name: fichiers
+          mountPath: /config
+          readOnly: true
+  volumes:
+    - name: fichiers
+      configMap:
+        name: fichiers
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lecteur-secret
+  namespace: td-07
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.37
+      command: ["sleep", "3600"]
+      env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: identifiants
+              key: motdepasse
+      volumeMounts:
+        - name: secrets
+          mountPath: /secrets
+          readOnly: true
+  volumes:
+    - name: secrets
+      secret:
+        secretName: identifiants
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: version
+  namespace: td-07
+immutable: true
+data:
+  NUMERO: "1"
