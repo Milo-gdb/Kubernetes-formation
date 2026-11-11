@@ -35,6 +35,6 @@ Dans `task-manager`, applique la version `fil-rouge/07-config-secrets/` en compr
 - aucun `value:` contenant un mot de passe ne doit subsister dans les Deployments.
 
 !!! warning "Base de données à réinitialiser"
-    Le script `init.sql` n'est exécuté par l'image PostgreSQL que si le répertoire de données est **vide**. Si PostgreSQL tourne déjà (chapitre 04-06, sans volume), supprime son Pod pour qu'il redémarre à vide : `kubectl delete pod -n task-manager -l app=postgres`.
+    Le script `01-schema.sql` du ConfigMap `postgres-init` n’est exécuté par l'image PostgreSQL que si le répertoire de données est **vide**. Si PostgreSQL tourne déjà (chapitre 04-06, sans volume), supprime son Pod pour qu'il redémarre à vide : `kubectl delete pod -n task-manager -l app=postgres`.
 
 Puis ouvre `http://task-manager.local`, crée une tâche, marque-la comme terminée.

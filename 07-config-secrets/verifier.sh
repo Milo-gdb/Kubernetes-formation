@@ -41,6 +41,6 @@ exercice "Ex.5b — Fil rouge : aucun mot de passe en clair dans les Deployments
 
 ex5c() { deploy_pret task-manager api && http_port_forward task-manager svc/frontend 80 /api/tasks '"title"'; }
 exercice "Ex.5c — Fil rouge : le frontend relaie /api/tasks vers l'API qui lit la base" \
-  "Si /api/tasks échoue : journaux de l'API, puis de PostgreSQL (init.sql exécuté ? rôle web_anon créé ?)." ex5c
+  "Si /api/tasks échoue : journaux de l'API, puis de PostgreSQL (schéma initial exécuté ? rôle web_anon créé ?)." ex5c
 
 bilan

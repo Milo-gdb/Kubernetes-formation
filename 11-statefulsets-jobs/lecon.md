@@ -178,7 +178,10 @@ Le chart Helm du chapitre 12 franchira l'étape suivante : PostgreSQL y est dép
         - name: psql
           image: postgres:17-alpine
           command: ["sh", "-c", "gunzip -c $(ls -1t /sauvegardes/*.sql.gz | head -1) | psql -h postgres"]
-          envFrom: []   # PGUSER, PGPASSWORD, PGDATABASE : mêmes secretKeyRef que le CronJob
+          env:
+            - { name: PGUSER, valueFrom: { secretKeyRef: { name: postgres-credentials, key: POSTGRES_USER } } }
+            - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: postgres-credentials, key: POSTGRES_PASSWORD } } }
+            - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: postgres-credentials, key: POSTGRES_DB } } }
           volumeMounts: [{ name: s, mountPath: /sauvegardes }]
       volumes: [{ name: s, persistentVolumeClaim: { claimName: sauvegardes } }]
     ```

@@ -58,7 +58,10 @@ spec:
                 - sh
                 - -c
                 - |
-                  set -e
+                  set -eo pipefail
+                  # Les règles réseau (NetworkPolicy) d'un Pod tout neuf peuvent mettre
+                  # quelques secondes à s'appliquer : on attend que la base réponde.
+                  for i in $(seq 1 30); do pg_isready -t 2 && break; sleep 2; done
                   fichier=/sauvegardes/taskmanager-$(date +%Y%m%d-%H%M%S).sql.gz
                   pg_dump | gzip > "$fichier"
                   echo "Sauvegarde écrite : $fichier ($(wc -c < "$fichier") octets)"

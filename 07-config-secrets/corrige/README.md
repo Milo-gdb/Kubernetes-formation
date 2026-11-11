@@ -51,7 +51,7 @@ kubectl patch configmap version -n td-07 -p '{"data":{"NUMERO":"2"}}'
 
 ```bash
 kubectl apply -f fil-rouge/07-config-secrets/
-kubectl delete pod -n task-manager -l app=postgres      # si la base existait déjà sans init.sql
+kubectl delete pod -n task-manager -l app=postgres      # si la base existait déjà sans le schéma
 kubectl rollout status -n task-manager deploy/api
 curl http://task-manager.local/api/tasks
 grep -n "value:" fil-rouge/07-config-secrets/*-deployment.yaml   # plus aucun mot de passe

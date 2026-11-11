@@ -165,7 +165,7 @@ Dans [`fil-rouge/07-config-secrets/`](../fil-rouge/07-config-secrets/05-secrets.
 | `postgres-credentials` | Secret | utilisateur, mot de passe, base | PostgreSQL (`secretKeyRef`) |
 | `api-db` | Secret | `PGRST_DB_URI` (contient le mot de passe) | API (`envFrom.secretRef`) |
 | `api-config` | ConfigMap | schéma, rôle anonyme, port d'administration | API (`envFrom.configMapRef`) |
-| `postgres-init` | ConfigMap | `init.sql` : table `tasks`, rôle `web_anon` | PostgreSQL (volume sur `/docker-entrypoint-initdb.d`) |
+| `postgres-init` | ConfigMap | `01-schema.sql` : table `tasks`, rôle `web_anon` | PostgreSQL (volume sur `/docker-entrypoint-initdb.d`) |
 | `frontend-nginx` | ConfigMap | `default.conf` : sert le HTML et relaie `/api/` vers `api:3000` | frontend (volume sur `/etc/nginx/conf.d`) |
 | `frontend-html` | ConfigMap | `index.html` : l'interface du gestionnaire de tâches | frontend (volume) |
 
