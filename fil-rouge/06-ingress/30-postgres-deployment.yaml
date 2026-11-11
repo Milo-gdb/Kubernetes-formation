@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: task-manager
+  labels:
+    app: postgres
+    app.kubernetes.io/part-of: task-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        app.kubernetes.io/part-of: task-manager
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            # ⚠️ Valeurs en clair : provisoire, corrigé au chapitre 07 (Secret).
+            - name: POSTGRES_USER
+              value: taskmanager
+            - name: POSTGRES_PASSWORD
+              value: ChangeMe-Formation-2026
+            - name: POSTGRES_DB
+              value: taskmanager

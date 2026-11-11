@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: casse
+  namespace: td-03
+  labels:
+    app: casse
+spec:
+  containers:
+    - name: web
+      image: nginx:1.30-alpine   # le tag était mal orthographié : "alpnie"
+      ports:
+        - containerPort: 80

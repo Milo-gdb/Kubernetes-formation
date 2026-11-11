@@ -1,0 +1,16 @@
+# Demande de stockage persistant : k3s la satisfait avec la StorageClass "local-path"
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+  namespace: task-manager
+  labels:
+    app: postgres
+    app.kubernetes.io/part-of: task-manager
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
