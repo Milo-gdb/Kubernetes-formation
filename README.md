@@ -116,15 +116,6 @@ mkdocs build --strict           # génère le site statique dans site/
 
 La configuration est dans [`mkdocs.yml`](https://github.com/Milo-gdb/Kubernetes-formation/blob/main/mkdocs.yml) : thème Material, navigation par chapitres et section **Bonus**, recherche en français, mode sombre. Le plugin `mkdocs-same-dir` permet de publier les Markdown directement depuis la racine du dépôt.
 
-### Déploiement sur GitHub Pages
-
-Le workflow [`.github/workflows/docs.yml`](https://github.com/Milo-gdb/Kubernetes-formation/blob/main/.github/workflows/docs.yml) construit le site (`mkdocs build --strict`) à chaque pull request, et le publie à chaque push sur `main`.
-
-1. Sur GitHub : **Settings → Pages → Build and deployment → Source : GitHub Actions** (une seule fois).
-2. Pousse sur `main` (ou lance le workflow à la main : **Actions → Site MkDocs → Run workflow**).
-3. Le site est disponible sur `https://<utilisateur>.github.io/<dépôt>/`, ici <https://milo-gdb.github.io/Kubernetes-formation/>.
-
-Alternative sans workflow : `mkdocs gh-deploy` construit le site et le pousse sur la branche `gh-pages` (choisir alors **Source : Deploy from a branch → gh-pages**).
 
 ## Licence et contributions
 
