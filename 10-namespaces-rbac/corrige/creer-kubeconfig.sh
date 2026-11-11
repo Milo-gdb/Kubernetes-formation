@@ -7,6 +7,7 @@ SERVEUR=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server
 CA=$(kubectl config view --minify --raw -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
 JETON=$(kubectl create token lecteur -n td-10 --duration=24h)
 
+umask 077
 cat > "$SORTIE" <<FIN
 apiVersion: v1
 kind: Config
