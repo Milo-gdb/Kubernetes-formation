@@ -303,6 +303,12 @@ cle_ssh_publique() {  # affiche le chemin de la clé publique de l'utilisateur, 
   echo "$HOME_UTILISATEUR/.ssh/id_ed25519.pub"
 }
 
+cle_utilisable() {  # la clé doit marcher sans interaction : pas de phrase de passe, ou déjà chargée dans ssh-agent
+  local pub="$1"
+  en_utilisateur ssh-keygen -y -P "" -f "${pub%.pub}" >/dev/null 2>&1 && return
+  ssh-add -L 2>/dev/null | grep -qF "$(cut -d' ' -f2 "$pub")"
+}
+
 ecrire_user_data() {  # ecrire_user_data <fichier> <clé publique> : cloud-init qui crée l'utilisateur et lance le mode VM
   local fichier="$1" cle script_b64 source_script="$0" tmp_script=""
   cle="$(cat "$2")"
@@ -379,6 +385,7 @@ mode_complet() {
   else
     local cle user_data
     cle="$(cle_ssh_publique)"
+    cle_utilisable "$cle" || erreur "La clé $cle est protégée par une phrase de passe : charge-la d'abord avec  eval \"\$(ssh-agent)\" && ssh-add  puis relance."
     ok "clé SSH : $cle"
     if [ -s "$image" ]; then
       ok "image déjà téléchargée : $image"
