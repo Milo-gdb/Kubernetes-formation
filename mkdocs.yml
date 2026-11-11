@@ -1,0 +1,136 @@
+site_name: Formation Kubernetes
+site_description: Formation Kubernetes complète en français, de Linux à Helm, avec k3s et une application fil rouge.
+site_url: https://milo-gdb.github.io/Kubernetes-formation/
+repo_url: https://github.com/Milo-gdb/Kubernetes-formation
+repo_name: Milo-gdb/Kubernetes-formation
+edit_uri: edit/main/
+
+# Les Markdown sont à la racine du dépôt (README.md = page d'accueil) : plugin same-dir.
+docs_dir: .
+exclude_docs: |
+  site/
+  .venv/
+  requirements-docs.txt
+
+theme:
+  name: material
+  language: fr
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/weather-night
+        name: Mode sombre
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Mode clair
+
+plugins:
+  - same-dir
+  - search:
+      lang: fr
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Accueil: README.md
+  - Fondations:
+      - "00 — Prérequis":
+          - Leçon: 00-prerequis/lecon.md
+          - TD: 00-prerequis/td.md
+          - Corrigé: 00-prerequis/corrige/README.md
+      - "01 — Conteneurs et réseau":
+          - Leçon: 01-conteneurs-reseau/lecon.md
+          - "Mini-leçon : containerd": 01-conteneurs-reseau/mini-lecon-containerd.md
+          - TD: 01-conteneurs-reseau/td.md
+          - Corrigé: 01-conteneurs-reseau/corrige/README.md
+      - "02 — Installation de k3s":
+          - Leçon: 02-installation-k3s/lecon.md
+          - "Mini-leçon : etcd": 02-installation-k3s/mini-lecon-etcd.md
+          - TD: 02-installation-k3s/td.md
+          - Corrigé: 02-installation-k3s/corrige/README.md
+  - Objets de base:
+      - "03 — Pods":
+          - Leçon: 03-pods/lecon.md
+          - TD: 03-pods/td.md
+          - Corrigé: 03-pods/corrige/README.md
+      - "04 — Deployments":
+          - Leçon: 04-deployments/lecon.md
+          - TD: 04-deployments/td.md
+          - Corrigé: 04-deployments/corrige/README.md
+      - "05 — Services":
+          - Leçon: 05-services/lecon.md
+          - TD: 05-services/td.md
+          - Corrigé: 05-services/corrige/README.md
+      - "06 — Ingress":
+          - Leçon: 06-ingress/lecon.md
+          - "Mini-leçon : NGINX Ingress": 06-ingress/mini-lecon-nginx-ingress.md
+          - TD: 06-ingress/td.md
+          - Corrigé: 06-ingress/corrige/README.md
+      - "07 — ConfigMaps et Secrets":
+          - Leçon: 07-config-secrets/lecon.md
+          - TD: 07-config-secrets/td.md
+          - Corrigé: 07-config-secrets/corrige/README.md
+      - "08 — Volumes":
+          - Leçon: 08-volumes/lecon.md
+          - TD: 08-volumes/td.md
+          - Corrigé: 08-volumes/corrige/README.md
+  - Production:
+      - "09 — Sondes, ressources, autoscaling":
+          - Leçon: 09-sondes-ressources-autoscaling/lecon.md
+          - TD: 09-sondes-ressources-autoscaling/td.md
+          - Corrigé: 09-sondes-ressources-autoscaling/corrige/README.md
+      - "10 — Namespaces, RBAC, NetworkPolicies":
+          - Leçon: 10-namespaces-rbac/lecon.md
+          - TD: 10-namespaces-rbac/td.md
+          - Corrigé: 10-namespaces-rbac/corrige/README.md
+      - "11 — StatefulSets, Jobs, CronJobs":
+          - Leçon: 11-statefulsets-jobs/lecon.md
+          - TD: 11-statefulsets-jobs/td.md
+          - Corrigé: 11-statefulsets-jobs/corrige/README.md
+      - "12 — Helm et écosystème":
+          - Leçon: 12-helm-ecosysteme/lecon.md
+          - "Mini-leçon : Helm": 12-helm-ecosysteme/mini-lecon-helm.md
+          - TD: 12-helm-ecosysteme/td.md
+          - Corrigé: 12-helm-ecosysteme/corrige/README.md
+  - Bonus:
+      - "Bonus 01 — k9s":
+          - Leçon: bonus-01-k9s/lecon.md
+          - TD: bonus-01-k9s/td.md
+          - Corrigé: bonus-01-k9s/corrige/README.md
+      - "Bonus 02 — Interfaces web":
+          - Leçon: bonus-02-interfaces-web/lecon.md
+          - TD: bonus-02-interfaces-web/td.md
+          - Corrigé: bonus-02-interfaces-web/corrige/README.md
+      - "Bonus 03 — Lens et alternatives":
+          - Leçon: bonus-03-lens-alternatives/lecon.md
+          - TD: bonus-03-lens-alternatives/td.md
+          - Corrigé: bonus-03-lens-alternatives/corrige/README.md
+  - Fil rouge:
+      - Présentation: fil-rouge/README.md
+      - Chart Helm: fil-rouge/12-helm/task-manager/README.md
