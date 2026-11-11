@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hotes
+  namespace: td-06
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: a.demo.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: app-a, port: { number: 80 } }
+    - host: b.demo.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: app-b, port: { number: 80 } }

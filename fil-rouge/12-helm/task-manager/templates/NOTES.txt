@@ -1,0 +1,19 @@
+task-manager {{ .Chart.AppVersion }} installé dans le namespace {{ .Release.Namespace }}.
+
+{{- if .Values.ingress.enabled }}
+
+Application : http://{{ .Values.ingress.host }}
+{{- with .Values.ingress.apiHost }}
+API         : http://{{ . }}/tasks
+{{- end }}
+
+Ajoute dans /etc/hosts (IP du nœud / du contrôleur Ingress) :
+  <IP>  {{ .Values.ingress.host }} {{ .Values.ingress.apiHost }}
+{{- else }}
+
+kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "task-manager.fullname" . }}-frontend 8080:80
+puis http://localhost:8080
+{{- end }}
+
+Mot de passe PostgreSQL :
+  kubectl get secret -n {{ .Release.Namespace }} {{ include "task-manager.fullname" . }}-postgres -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d

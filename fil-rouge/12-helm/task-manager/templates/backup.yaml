@@ -1,0 +1,61 @@
+{{- if .Values.backup.enabled -}}
+{{- $nom := include "task-manager.fullname" . -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $nom }}-sauvegardes
+  labels:
+    {{- include "task-manager.labels" . | nindent 4 }}
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: {{ .Values.backup.size }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $nom }}-sauvegarde
+  labels:
+    {{- include "task-manager.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  timeZone: {{ .Values.backup.timeZone }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/instance: {{ .Release.Name }}
+            postgres-client: "true"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-dump
+              image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+              env:
+                - { name: PGHOST, value: {{ $nom }}-postgres }
+                - { name: PGUSER, valueFrom: { secretKeyRef: { name: {{ $nom }}-postgres, key: POSTGRES_USER } } }
+                - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: {{ $nom }}-postgres, key: POSTGRES_PASSWORD } } }
+                - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: {{ $nom }}-postgres, key: POSTGRES_DB } } }
+              command:
+                - sh
+                - -c
+                - |
+                  set -eo pipefail
+                  # Les règles réseau (NetworkPolicy) d'un Pod tout neuf peuvent mettre
+                  # quelques secondes à s'appliquer : on attend que la base réponde.
+                  for i in $(seq 1 30); do pg_isready -t 2 && break; sleep 2; done
+                  f=/sauvegardes/taskmanager-$(date +%Y%m%d-%H%M%S).sql.gz
+                  pg_dump | gzip > "$f"
+                  echo "Sauvegarde écrite : $f"
+                  ls -1t /sauvegardes/*.sql.gz | tail -n +{{ add .Values.backup.keep 1 }} | xargs -r rm -f
+              volumeMounts:
+                - { name: sauvegardes, mountPath: /sauvegardes }
+          volumes:
+            - name: sauvegardes
+              persistentVolumeClaim:
+                claimName: {{ $nom }}-sauvegardes
+{{- end }}

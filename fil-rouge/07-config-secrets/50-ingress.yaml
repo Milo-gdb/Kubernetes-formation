@@ -1,0 +1,32 @@
+# Ingress : routage HTTP par nom d'hôte.
+# Ajouter dans /etc/hosts :  <IP-du-noeud>  task-manager.local api.task-manager.local
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: task-manager
+  namespace: task-manager
+  labels:
+    app.kubernetes.io/part-of: task-manager
+spec:
+  ingressClassName: traefik   # contrôleur fourni par k3s (remplacer par "nginx" si besoin)
+  rules:
+    - host: task-manager.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  name: http
+    - host: api.task-manager.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port:
+                  name: http

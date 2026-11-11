@@ -1,0 +1,34 @@
+# API REST : PostgREST expose automatiquement les tables PostgreSQL en HTTP/JSON.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: task-manager
+  labels:
+    app: api
+    app.kubernetes.io/part-of: task-manager
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+        app.kubernetes.io/part-of: task-manager
+    spec:
+      containers:
+        - name: postgrest
+          image: postgrest/postgrest:v16.5
+          ports:
+            - containerPort: 3000
+              name: http
+          env:
+            # ⚠️ Mot de passe en clair : provisoire, corrigé au chapitre 07 (Secret).
+            - name: PGRST_DB_URI
+              value: postgres://taskmanager:ChangeMe-Formation-2026@postgres:5432/taskmanager
+            - name: PGRST_DB_SCHEMAS
+              value: public
+            - name: PGRST_DB_ANON_ROLE
+              value: taskmanager

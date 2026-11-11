@@ -1,0 +1,8 @@
+application: task-manager
+composants:
+  - nom: frontend
+    port: 80
+  - nom: api
+    port: 3000
+  - nom: postgres
+    port: 5432

@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ephemere
+  namespace: td-08
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.37
+      command: ["sh", "-c", "mkdir -p /data && date > /data/date.txt && sleep 3600"]
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: donnees
+  namespace: td-08
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 200Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecrivain
+  namespace: td-08
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate          # volume RWO : on évite deux Pods simultanés
+  selector:
+    matchLabels: { app: ecrivain }
+  template:
+    metadata:
+      labels: { app: ecrivain }
+    spec:
+      containers:
+        - name: busybox
+          image: busybox:1.37
+          command: ["sh", "-c", "while true; do date >> /data/journal.txt; sleep 10; done"]
+          volumeMounts:
+            - name: donnees
+              mountPath: /data
+      volumes:
+        - name: donnees
+          persistentVolumeClaim:
+            claimName: donnees

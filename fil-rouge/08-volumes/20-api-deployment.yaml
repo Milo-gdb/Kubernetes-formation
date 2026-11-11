@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: task-manager
+  labels:
+    app: api
+    app.kubernetes.io/part-of: task-manager
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+        app.kubernetes.io/part-of: task-manager
+    spec:
+      containers:
+        - name: postgrest
+          image: postgrest/postgrest:v16.5
+          ports:
+            - containerPort: 3000
+              name: http
+            - containerPort: 3001
+              name: admin
+          envFrom:
+            - configMapRef:
+                name: api-config      # PGRST_DB_SCHEMAS, PGRST_DB_ANON_ROLE...
+            - secretRef:
+                name: api-db          # PGRST_DB_URI (contient le mot de passe)
+          # Sondes (détaillées au chapitre 09) : PostgREST peut rester bloqué si la base
+          # redémarre pendant son propre démarrage ; liveness le relance, readiness
+          # le retire du Service tant qu'il n'est pas connecté à PostgreSQL.
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: admin
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: admin
+            initialDelaySeconds: 10
+            periodSeconds: 10

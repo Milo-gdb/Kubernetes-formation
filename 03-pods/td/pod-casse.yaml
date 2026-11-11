@@ -1,0 +1,14 @@
+# Ce Pod ne démarre pas. À toi de trouver pourquoi... et de le réparer !
+apiVersion: v1
+kind: Pod
+metadata:
+  name: casse
+  namespace: td-03
+  labels:
+    app: casse
+spec:
+  containers:
+    - name: web
+      image: nginx:1.30-alpnie
+      ports:
+        - containerPort: 80

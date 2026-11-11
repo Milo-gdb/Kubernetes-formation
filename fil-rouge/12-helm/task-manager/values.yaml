@@ -1,0 +1,62 @@
+# Valeurs par défaut du chart task-manager.
+# Surcharge-les avec --set clé=valeur ou -f mes-valeurs.yaml.
+
+frontend:
+  image:
+    repository: nginx
+    tag: 1.30-alpine
+  replicas: 2
+  resources:
+    requests: { cpu: 25m, memory: 32Mi }
+    limits: { memory: 64Mi }
+
+api:
+  image:
+    repository: postgrest/postgrest
+    tag: v16.5
+  replicas: 2
+  port: 3000
+  logLevel: info
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { memory: 128Mi }
+
+postgres:
+  image:
+    repository: postgres
+    tag: 17-alpine
+  user: taskmanager
+  database: taskmanager
+  # Laisser vide pour générer un mot de passe aléatoire à l'installation
+  # (conservé lors des mises à jour grâce à la fonction lookup).
+  # Lu par PostgreSQL au 1er démarrage seulement (volume vide). Pour le changer ensuite :
+  # ALTER ROLE dans la base, puis helm upgrade avec la même valeur.
+  password: ""
+  persistence:
+    size: 1Gi
+    storageClass: ""        # vide = StorageClass par défaut du cluster (local-path dans k3s)
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { memory: 512Mi }
+
+ingress:
+  enabled: true
+  className: traefik
+  host: task-manager.local
+  apiHost: api.task-manager.local   # vide pour ne pas exposer l'API directement
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+networkPolicy:
+  enabled: true
+
+backup:
+  enabled: false
+  schedule: "0 2 * * *"
+  timeZone: Europe/Paris
+  keep: 7
+  size: 1Gi

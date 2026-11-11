@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bavard
+  namespace: td-03
+  labels:
+    app: bavard
+spec:
+  containers:
+    - name: bavard
+      image: busybox:1.37
+      env:
+        - name: PRENOM
+          value: Milo
+      command: ["sh", "-c"]
+      args:
+        - while true; do echo "Bonjour ${PRENOM} depuis Kubernetes"; sleep 5; done

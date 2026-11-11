@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Task Manager — Formation Kubernetes</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 2rem auto; color: #222; }
+    h1 { color: #326ce5; }
+    li { padding: .3rem 0; }
+    li.done span { text-decoration: line-through; color: #888; }
+    button { margin-left: .5rem; }
+    #err { color: #c00; }
+  </style>
+</head>
+<body>
+  <h1>Task Manager</h1>
+  <p>Frontend nginx → API PostgREST → PostgreSQL, le tout sur Kubernetes.</p>
+  <form id="form">
+    <input id="title" placeholder="Nouvelle tâche" required>
+    <button type="submit">Ajouter</button>
+  </form>
+  <p id="err"></p>
+  <ul id="list"></ul>
+  <script>
+    const api = '/api/tasks';
+    const json = { 'Content-Type': 'application/json' };
+    async function charger() {
+      try {
+        const r = await fetch(api + '?order=id');
+        if (!r.ok) throw new Error('API : HTTP ' + r.status);
+        const tasks = await r.json();
+        document.getElementById('err').textContent = '';
+        const ul = document.getElementById('list');
+        ul.innerHTML = '';
+        for (const t of tasks) {
+          const li = document.createElement('li');
+          li.className = t.done ? 'done' : '';
+          const s = document.createElement('span');
+          s.textContent = t.title;
+          const b1 = document.createElement('button');
+          b1.textContent = t.done ? 'Rouvrir' : 'Terminer';
+          b1.onclick = () => fetch(api + '?id=eq.' + t.id, { method: 'PATCH', headers: json, body: JSON.stringify({ done: !t.done }) }).then(charger);
+          const b2 = document.createElement('button');
+          b2.textContent = 'Supprimer';
+          b2.onclick = () => fetch(api + '?id=eq.' + t.id, { method: 'DELETE' }).then(charger);
+          li.append(s, b1, b2);
+          ul.append(li);
+        }
+      } catch (e) {
+        document.getElementById('err').textContent = e.message;
+      }
+    }
+    document.getElementById('form').onsubmit = async (ev) => {
+      ev.preventDefault();
+      const title = document.getElementById('title').value;
+      await fetch(api, { method: 'POST', headers: json, body: JSON.stringify({ title }) });
+      document.getElementById('title').value = '';
+      charger();
+    };
+    charger();
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+# Chapitre 10 — Compte d'observation et isolation réseau de PostgreSQL.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: observateur
+  namespace: task-manager
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: observateur-view
+  namespace: task-manager
+subjects:
+  - kind: ServiceAccount
+    name: observateur
+    namespace: task-manager
+roleRef:
+  kind: ClusterRole
+  name: view                 # lecture de tout le namespace, sauf les Secrets
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-depuis-api
+  namespace: task-manager
+spec:
+  podSelector:
+    matchLabels: { app: postgres }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app: api }
+        # Deuxième source autorisée (OU) : les Pods clients explicitement
+        # étiquetés, comme la sauvegarde du chapitre 11.
+        - podSelector:
+            matchLabels: { postgres-client: "true" }
+      ports:
+        - port: 5432

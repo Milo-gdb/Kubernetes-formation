@@ -1,0 +1,76 @@
+# Chapitre 11 — Sauvegarde quotidienne de la base par un CronJob.
+# À appliquer en plus de fil-rouge/09-sondes-ressources/ (et de la NetworkPolicy
+# du chapitre 10, qui autorise les Pods étiquetés postgres-client: "true").
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sauvegardes
+  namespace: task-manager
+  labels:
+    app.kubernetes.io/part-of: task-manager
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: sauvegarde
+  namespace: task-manager
+  labels:
+    app.kubernetes.io/part-of: task-manager
+spec:
+  schedule: "0 2 * * *"            # tous les jours à 2 h (heure du contrôleur, UTC par défaut)
+  timeZone: Europe/Paris
+  concurrencyPolicy: Forbid        # jamais deux sauvegardes simultanées
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app: sauvegarde
+            postgres-client: "true"
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-dump
+              image: postgres:17-alpine
+              env:
+                - name: PGHOST
+                  value: postgres
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef: { name: postgres-credentials, key: POSTGRES_USER }
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef: { name: postgres-credentials, key: POSTGRES_PASSWORD }
+                - name: PGDATABASE
+                  valueFrom:
+                    secretKeyRef: { name: postgres-credentials, key: POSTGRES_DB }
+              command:
+                - sh
+                - -c
+                - |
+                  set -eo pipefail
+                  # Les règles réseau (NetworkPolicy) d'un Pod tout neuf peuvent mettre
+                  # quelques secondes à s'appliquer : on attend que la base réponde.
+                  for i in $(seq 1 30); do pg_isready -t 2 && break; sleep 2; done
+                  fichier=/sauvegardes/taskmanager-$(date +%Y%m%d-%H%M%S).sql.gz
+                  pg_dump | gzip > "$fichier"
+                  echo "Sauvegarde écrite : $fichier ($(wc -c < "$fichier") octets)"
+                  # on ne garde que les 7 plus récentes
+                  ls -1t /sauvegardes/*.sql.gz | tail -n +8 | xargs -r rm -f
+              volumeMounts:
+                - name: sauvegardes
+                  mountPath: /sauvegardes
+          volumes:
+            - name: sauvegardes
+              persistentVolumeClaim:
+                claimName: sauvegardes

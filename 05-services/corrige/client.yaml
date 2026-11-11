@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client
+  namespace: td-05
+spec:
+  containers:
+    - name: client
+      image: busybox:1.37
+      command: ["sleep", "3600"]

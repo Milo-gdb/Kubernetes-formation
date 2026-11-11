@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: td-04
+  labels:
+    app: web
+spec:
+  replicas: 3            # passé à 5 à l'exercice 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.29-alpine   # 1.30-alpine à l'exercice 3
+          ports:
+            - containerPort: 80
+              name: http

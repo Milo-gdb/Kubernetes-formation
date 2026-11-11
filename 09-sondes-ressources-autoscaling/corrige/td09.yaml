@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vivant
+  namespace: td-09
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.37
+      command: ["sh", "-c", "touch /tmp/sante; sleep 30; rm -f /tmp/sante; sleep 3600"]
+      livenessProbe:
+        exec:
+          command: ["test", "-e", "/tmp/sante"]
+        initialDelaySeconds: 5
+        periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: td-09
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: web }
+  template:
+    metadata:
+      labels: { app: web }
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.30-alpine
+          ports: [{ containerPort: 80, name: http }]
+          resources:
+            requests: { cpu: 50m, memory: 32Mi }
+            limits: { memory: 64Mi }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket: { port: http }   # voir README : pourquoi pas httpGet "/" ?
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: td-09
+spec:
+  selector: { app: web }
+  ports: [{ port: 80, targetPort: http }]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gourmand
+  namespace: td-09
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.37
+      command: ["sh", "-c", 'a=$(head -c 100000000 /dev/zero | tr "\0" a); sleep 3600']
+      resources:
+        limits: { memory: 64Mi }
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: garanti
+  namespace: td-09
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.37
+      command: ["sleep", "3600"]
+      resources:
+        requests: { cpu: 50m, memory: 16Mi }
+        limits: { cpu: 50m, memory: 16Mi }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web
+  namespace: td-09
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50

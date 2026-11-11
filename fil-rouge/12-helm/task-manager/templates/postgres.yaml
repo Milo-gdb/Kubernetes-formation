@@ -1,0 +1,79 @@
+{{- $nom := include "task-manager.fullname" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $nom }}-postgres
+  labels:
+    {{- include "task-manager.labels" . | nindent 4 }}
+spec:
+  clusterIP: None            # headless : nom DNS stable pour le StatefulSet
+  selector:
+    {{- include "task-manager.selector" (dict "ctx" . "composant" "postgres") | nindent 4 }}
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $nom }}-postgres
+  labels:
+    {{- include "task-manager.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgres
+spec:
+  serviceName: {{ $nom }}-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "task-manager.selector" (dict "ctx" . "composant" "postgres") | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "task-manager.selector" (dict "ctx" . "composant" "postgres") | nindent 8 }}
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          ports:
+            - containerPort: 5432
+              name: postgres
+          envFrom:
+            - secretRef:
+                name: {{ $nom }}-postgres
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"']
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"']
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.postgres.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+      volumes:
+        - name: init
+          configMap:
+            name: {{ $nom }}-postgres-init
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ReadWriteOnce]
+        {{- with .Values.postgres.persistence.storageClass }}
+        storageClassName: {{ . }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.postgres.persistence.size }}
