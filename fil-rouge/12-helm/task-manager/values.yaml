@@ -29,6 +29,8 @@ postgres:
   database: taskmanager
   # Laisser vide pour générer un mot de passe aléatoire à l'installation
   # (conservé lors des mises à jour grâce à la fonction lookup).
+  # Lu par PostgreSQL au 1er démarrage seulement (volume vide). Pour le changer ensuite :
+  # ALTER ROLE dans la base, puis helm upgrade avec la même valeur.
   password: ""
   persistence:
     size: 1Gi

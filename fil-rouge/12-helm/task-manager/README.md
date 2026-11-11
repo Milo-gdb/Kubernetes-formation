@@ -17,7 +17,7 @@ helm install task-manager fil-rouge/12-helm/task-manager -n tm-helm --create-nam
 | `frontend.replicas` / `api.replicas` | `2` | réplicas (ignorés si `autoscaling.enabled`) |
 | `api.image.tag` | `v16.5` | version de PostgREST |
 | `postgres.user` / `postgres.database` | `taskmanager` | identifiants de la base |
-| `postgres.password` | `""` | vide = mot de passe aléatoire généré puis conservé (`lookup`) |
+| `postgres.password` | `""` | vide = mot de passe aléatoire généré puis conservé (`lookup`). Fixé au 1er démarrage de PostgreSQL : le changer ensuite demande un `ALTER ROLE` en base |
 | `postgres.persistence.size` | `1Gi` | taille du volume de données |
 | `postgres.persistence.storageClass` | `""` | vide = StorageClass par défaut |
 | `ingress.enabled` | `true` | crée l'Ingress |
