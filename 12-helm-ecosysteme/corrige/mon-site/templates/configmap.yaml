@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mon-site.fullname" . }}
+  labels:
+    {{- include "mon-site.labels" . | nindent 4 }}
+data:
+  index.html: |
+    <!doctype html>
+    <html lang="fr"><body><h1>{{ .Values.message }}</h1></body></html>
