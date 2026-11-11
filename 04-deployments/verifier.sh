@@ -29,9 +29,9 @@ exercice "Ex.4 — Rollback effectué (≥ 4 révisions, retour à 1.30, aucun P
 
 ex5() {
   ! ressource_existe task-manager pod frontend \
-    && deploy_pret task-manager frontend 3 && deploy_pret task-manager api 2 && deploy_pret task-manager postgres 1
+    && deploy_pret task-manager frontend && [ "$(kget task-manager deployment/frontend '{.spec.replicas}')" -ge 2 ] && deploy_pret task-manager api 2 && deploy_pret task-manager postgres 1
 }
-exercice "Ex.5 — Fil rouge : Deployments frontend (3), api (2) et postgres (1) prêts, Pod nu supprimé" \
+exercice "Ex.5 — Fil rouge : Deployments frontend (3, ou ≥2 avec le HPA du ch.09), api (2) et postgres (1) prêts, Pod nu supprimé" \
   "Compare tes manifestes à la leçon : noms, réplicas, images. Le Pod frontend du ch.03 doit être supprimé." ex5
 
 bilan
